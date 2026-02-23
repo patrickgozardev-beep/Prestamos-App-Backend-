@@ -18,6 +18,17 @@ Aplicación backend para gestión de préstamos, cronogramas de pago y registro 
 
 ## 📁 Estructura del proyecto
 
+prestamosapp/
+├─ src/
+│ ├─ main/
+│ │ ├─ java/com/prestamos/prestamosapp/
+│ │ │ ├─ model/
+│ │ │ ├─ dto/
+│ │ │ ├─ repository/
+│ │ │ └─ service/
+│ │ └─ resources/
+│ │ └─ application.properties
+└─ pom.xml
 
 ---
 
