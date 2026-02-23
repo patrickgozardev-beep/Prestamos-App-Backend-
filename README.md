@@ -23,6 +23,9 @@ prestamosapp/
 ├─ src/
 │  ├─ main/
 │  │  ├─ java/com/prestamos/prestamosapp/
+│  │  │  ├─ config/
+│  │  │  ├─ security/
+│  │  │  ├─ controller/
 │  │  │  ├─ model/
 │  │  │  ├─ dto/
 │  │  │  ├─ repository/
