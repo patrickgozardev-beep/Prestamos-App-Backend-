@@ -73,7 +73,7 @@ mvn spring-boot:run
 La API estará disponible en:
 http://localhost:8080
 
-##📦 Dependencias principales
+## 📦 Dependencias principales
 
 Spring Boot Starter Web: para APIs REST
 Spring Boot Starter Data JPA: para persistencia con Hibernate
@@ -81,7 +81,7 @@ Spring Boot Starter Validation: para validaciones de DTOs
 MySQL Connector/J: driver JDBC para MySQL
 Lombok: para generar getters, setters, constructores y builders automáticamente
 
-##📝 Funcionalidades
+## 📝 Funcionalidades
 
 Crear préstamos diarios o semanales
 Generar automáticamente cronogramas de pago
@@ -89,7 +89,7 @@ Registrar pagos completos o parciales, incluyendo excedentes
 Actualizar estado del cronograma: PENDIENTE, PARCIAL, PAGADO
 Reprogramar préstamos con intereses adicionales
 
-##🤝 Contribuciones
+## 🤝 Contribuciones
 
 Hacer un fork del proyecto
 Crear una rama nueva:
@@ -101,7 +101,7 @@ Subir la rama:
 git push origin feature/nombre-feature
 Abrir un Pull Request
 
-##📌 Notas
+## 📌 Notas
 
 Lombok requiere plugin en tu IDE para funcionar correctamente
 Cronogramas no cuentan domingos como fecha de pago
