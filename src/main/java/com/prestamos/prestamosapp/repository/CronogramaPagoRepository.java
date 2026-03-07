@@ -11,7 +11,6 @@ public interface CronogramaPagoRepository extends JpaRepository<CronogramaPago, 
 
     List<CronogramaPago> findByPrestamoId(Integer prestamoId);
     List<CronogramaPago> findByFechaPago(LocalDate fechaPago);
-    List<CronogramaPago> findByPagadoFalse();
     List<CronogramaPago> findByPrestamoIdAndMontoPagadoLessThanOrderByFechaPagoAsc(Integer prestamoId, BigDecimal monto);
 
 }

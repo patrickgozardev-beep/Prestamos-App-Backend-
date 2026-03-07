@@ -48,6 +48,6 @@ public class Usuario {
         fechaCreacion = LocalDateTime.now();
         fechaActualizacion = LocalDateTime.now();
         activo = true;
-        rol = "USER";
+        rol = "admin";
     }
 }
