@@ -20,10 +20,6 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    public List<Cliente> listarPorUsuario(Integer usuarioId){
-        return clienteRepository.findByUsuarioId(usuarioId);
-    }
-
     public Optional<Cliente> obtenerPorId(Integer id){
         return clienteRepository.findById(id);
     }
@@ -31,4 +27,17 @@ public class ClienteService {
     public void eliminar(Integer id){
         clienteRepository.deleteById(id);
     }
+
+    public List<Cliente> listarPorUsuario(Integer usuarioId){
+        return clienteRepository.findByUsuarioId(usuarioId);
+    }
+
+    public List<Cliente> listarClientes(){
+        return clienteRepository.findAll();
+    }
+
+    public List<Cliente> buscarClientes(Integer usuarioId, String busqueda){
+        return clienteRepository.buscarClientes(usuarioId, busqueda);
+    }
+
 }

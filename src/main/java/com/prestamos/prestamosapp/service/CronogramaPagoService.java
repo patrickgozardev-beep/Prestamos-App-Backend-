@@ -31,7 +31,4 @@ public class CronogramaPagoService {
         return cronogramaRepo.save(cronogramaPago);
     }
 
-    public List<CronogramaPago> pendientes(){
-        return cronogramaRepo.findByPagadoFalse();
-    }
 }

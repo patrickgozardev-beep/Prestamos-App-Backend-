@@ -11,9 +11,6 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
     // Buscar pagos por cronograma
     List<Pago> findByCronogramaId(Integer cronogramaId);
 
-    // Buscar pagos por prestamo
-    List<Pago> findByPrestamoId(Integer prestamoId);
-
     // Opcional: buscar pagos por metodo
     List<Pago> findByMetodo(String metodo);
 
