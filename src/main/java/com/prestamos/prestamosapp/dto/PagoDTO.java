@@ -10,6 +10,4 @@ public class PagoDTO {
     private BigDecimal monto;          // Monto del pago
     private String metodo;             // Puede ser efectivo, yape, etc.
     private String foto;               // URL o path de la foto del comprobante
-
-
 }

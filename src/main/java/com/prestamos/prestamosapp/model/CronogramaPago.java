@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.prestamos.prestamosapp.dto.EstadoPago;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,10 +22,6 @@ public class CronogramaPago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "prestamo_id", nullable = false)
-    private Prestamo prestamo;
-
     @Column(name = "numero_cuota")
     private int numeroCuota;
 
@@ -43,4 +40,9 @@ public class CronogramaPago {
 
     @Column(name = "monto_pagado", precision = 12, scale = 2)
     private BigDecimal montoPagado;
+
+    @ManyToOne
+    @JoinColumn(name = "prestamo_id", nullable = false)
+    @JsonIgnoreProperties({"cronogramas", "cliente", "usuario"}) // <--- AGREGA ESTO
+    private Prestamo prestamo;
 }

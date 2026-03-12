@@ -2,10 +2,10 @@ package com.prestamos.prestamosapp.service;
 
 import com.prestamos.prestamosapp.dto.EstadoPago;
 import com.prestamos.prestamosapp.dto.EstadoPrestamo;
+import com.prestamos.prestamosapp.dto.MetricasDashboardDTO;
 import com.prestamos.prestamosapp.dto.PrestamoDTO;
 import com.prestamos.prestamosapp.model.*;
 import com.prestamos.prestamosapp.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PrestamoService {
@@ -67,7 +68,7 @@ public class PrestamoService {
 
         //Generar cronograma diario
         List<CronogramaPago> cronograma = new ArrayList<>();
-        LocalDate fecha = prestamo.getFechaInicio();
+        LocalDate fecha = guardado.getFechaInicio().plusDays(1);
 
         int cuotas = prestamo.getCantidadCuotas();
         BigDecimal cuotaMonto = total.divide(BigDecimal.valueOf(prestamo.getCantidadCuotas()), 2, RoundingMode.HALF_UP);
@@ -104,7 +105,7 @@ public class PrestamoService {
     @Transactional
     public Prestamo crearPrestamoSemanal(PrestamoDTO dto) {
 
-        // Buscar entidades relacionadas
+        // 1. Buscar entidades relacionadas
         Cliente cliente = clienteRepo.findById(dto.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         TipoPrestamo tipoPrestamo = tipoPrestamoRepo.findById(dto.getTipoPrestamoId())
@@ -112,7 +113,7 @@ public class PrestamoService {
         Usuario usuario = usuarioRepo.findById(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Crear objeto Prestamo y setear campos del DTO
+        // 2. Crear objeto Prestamo (usamos dto.getCantidadCuotas())
         Prestamo prestamo = Prestamo.builder()
                 .cliente(cliente)
                 .tipoPrestamo(tipoPrestamo)
@@ -120,41 +121,57 @@ public class PrestamoService {
                 .monto(dto.getMonto())
                 .interesPorcentaje(dto.getInteresPorcentaje())
                 .fechaInicio(dto.getFechaInicio())
-                .cantidadCuotas(1)
+                .cantidadCuotas(dto.getCantidadCuotas()) // Dinámico como el diario
                 .estado(EstadoPrestamo.ACTIVO)
                 .build();
 
-        // Calcular monto total
+        // 3. Calcular montos
         BigDecimal total = calcularMontoTotal(prestamo.getMonto(), prestamo.getInteresPorcentaje());
         prestamo.setMontoTotal(total);
 
-        // Guardar préstamo
+        BigDecimal montoPorCuota = total.divide(
+                BigDecimal.valueOf(prestamo.getCantidadCuotas()), 2, RoundingMode.HALF_UP);
+
+        // 4. Guardar préstamo inicial
         Prestamo guardado = prestamoRepo.save(prestamo);
 
-        // Generar cronograma semanal
-        LocalDate fechaPago = prestamo.getFechaInicio().plusDays(7);
-        if (fechaPago.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            fechaPago = fechaPago.plusDays(1); // saltar domingo
+        // 5. Generar cronograma semanal
+        List<CronogramaPago> cronograma = new ArrayList<>();
+
+        // Empezamos a contar 7 días después de la fecha de inicio
+        LocalDate fechaCorriente = prestamo.getFechaInicio();
+
+        for (int i = 1; i <= guardado.getCantidadCuotas(); i++) {
+            // Sumamos una semana (7 días) para la siguiente cuota
+            fechaCorriente = fechaCorriente.plusWeeks(1);
+
+            // Si cae domingo, se pasa al lunes
+            if (fechaCorriente.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                fechaCorriente = fechaCorriente.plusDays(1);
+            }
+
+            CronogramaPago c = CronogramaPago.builder()
+                    .prestamo(guardado)
+                    .numeroCuota(i)
+                    .fechaPago(fechaCorriente)
+                    .monto(montoPorCuota)
+                    .montoPagado(BigDecimal.ZERO)
+                    .estado(EstadoPago.PENDIENTE)
+                    .build();
+
+            cronograma.add(c);
         }
 
-        CronogramaPago c = CronogramaPago.builder()
-                .prestamo(guardado)
-                .numeroCuota(1)
-                .fechaPago(fechaPago)
-                .monto(total)
-                .montoPagado(BigDecimal.ZERO)
-                .estado(EstadoPago.PENDIENTE)
-                .build();
+        cronogramaRepo.saveAll(cronograma);
 
-        cronogramaRepo.save(c);
-
-        guardado.setFechaFin(fechaPago);
+        // 6. Actualizar fecha de fin con la última cuota generada
+        guardado.setFechaFin(fechaCorriente);
 
         return guardado;
     }
 
     @Transactional
-    public Prestamo reprogramarPrestamo(Integer prestamoId, Integer nuevasCuotas) {
+    public Prestamo reprogramarPrestamo(Integer prestamoId, Integer nuevasCuotas, BigDecimal interesIngresado) {
 
         Prestamo anterior = prestamoRepo.findById(prestamoId)
                 .orElseThrow(() -> new RuntimeException("Préstamo no encontrado"));
@@ -174,14 +191,17 @@ public class PrestamoService {
         prestamoRepo.save(anterior);
 
         // Aplicar 20% interes
-        BigDecimal interes = saldoPendiente.multiply(new BigDecimal("0.20"));
-        BigDecimal nuevoMontoTotal = saldoPendiente.add(interes);
+        BigDecimal montoInteres = saldoPendiente.multiply(interesIngresado.divide(new BigDecimal("100")));
+        BigDecimal nuevoMontoTotal = saldoPendiente.add(montoInteres);
 
         // Crear nuevo préstamo
         Prestamo nuevo = new Prestamo();
         nuevo.setCliente(anterior.getCliente());
+        nuevo.setUsuario(anterior.getUsuario());
+        nuevo.setTipoPrestamo(anterior.getTipoPrestamo());
         nuevo.setPrestamoPadre(anterior);
         nuevo.setMonto(saldoPendiente);
+        nuevo.setInteresPorcentaje(interesIngresado);
         nuevo.setMontoTotal(nuevoMontoTotal);
         nuevo.setCantidadCuotas(nuevasCuotas);
         nuevo.setFechaInicio(anterior.getFechaFin().plusDays(1));
@@ -262,6 +282,16 @@ public class PrestamoService {
 
     public List<Prestamo> prestamosPorUsuario(Integer usuarioId){
         return prestamoRepo.findByUsuarioId(usuarioId);
+    }
+
+    public Optional<Prestamo> prestamosPorId (Integer prestamoId){
+        return prestamoRepo.findById(prestamoId);
+    }
+
+    public MetricasDashboardDTO obtenerMetricasDashboard() {
+        MetricasDashboardDTO metricas = prestamoRepo.obtenerResumenMetricas();
+
+        return metricas;
     }
 
 }
