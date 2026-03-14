@@ -58,10 +58,9 @@ public class PagoService {
 
         //Registrar el pago en la cuota actual
         Pago pagoPrincipal = registrarPagoEnCronograma(cronograma, montoParaEstaCuota, metodo, foto);
-        //Si hay excedente, distribuirlo en los cronogramas futuros
 
         if (excedente.compareTo(BigDecimal.ZERO) > 0) {
-            distribuirExcedente(cronograma.getPrestamo(), excedente, metodo);
+            distribuirExcedente(cronograma.getPrestamo(), excedente, metodo,pagoPrincipal.getFotoPago());
         }
         verificarYFinalizarPrestamo(cronograma.getPrestamo());
         return pagoPrincipal;
@@ -94,7 +93,7 @@ public class PagoService {
 
     // Distribuir excedente a los siguientes cronogramas pendientes
     @Transactional
-    public void distribuirExcedente(Prestamo prestamo, BigDecimal excedente, MetodoPago metodo) {
+    public void distribuirExcedente(Prestamo prestamo, BigDecimal excedente, MetodoPago metodo,String fotoPago) {
         List<CronogramaPago> futuros = cronogramaRepo
                 .findByPrestamoIdAndMontoPagadoLessThanOrderByFechaPagoAsc(prestamo.getId(), prestamo.getMonto());
 
@@ -112,6 +111,7 @@ public class PagoService {
                     .monto(pagoParaEstaCuota)
                     .metodo(metodo)
                     .fechaPago(LocalDateTime.now())
+                    .fotoPago(fotoPago)
                     .build();
             pagoRepo.save(pago);
 
@@ -213,4 +213,7 @@ public class PagoService {
                 .map(c -> c.getMonto().subtract(c.getMontoPagado() != null ? c.getMontoPagado() : BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+
+
 }

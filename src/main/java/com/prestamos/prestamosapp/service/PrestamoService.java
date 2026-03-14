@@ -25,15 +25,17 @@ public class PrestamoService {
     private final UsuarioRepository usuarioRepo;
     private final ClienteRepository clienteRepo;
     private final TipoPrestamoRepository tipoPrestamoRepo;
+    private final PagoRepository pagoRepo;
 
     public PrestamoService(PrestamoRepository prestamoRepo,
                            CronogramaPagoRepository cronogramaRepo,UsuarioRepository usuarioRepo,
-                           ClienteRepository clienteRepo,TipoPrestamoRepository tipoPrestamoRepo) {
+                           ClienteRepository clienteRepo,TipoPrestamoRepository tipoPrestamoRepo,PagoRepository pagoRepo) {
         this.prestamoRepo = prestamoRepo;
         this.cronogramaRepo = cronogramaRepo;
         this.usuarioRepo = usuarioRepo;
         this.clienteRepo = clienteRepo;
         this.tipoPrestamoRepo = tipoPrestamoRepo;
+        this.pagoRepo = pagoRepo;
     }
 
     @Transactional
@@ -277,11 +279,11 @@ public class PrestamoService {
     }
 
     public List<Prestamo> prestamosPorCliente(Integer clienteId){
-        return prestamoRepo.findByClienteId(clienteId);
+        return prestamoRepo.findByClienteIdCustomOrder(clienteId);
     }
 
     public List<Prestamo> prestamosPorUsuario(Integer usuarioId){
-        return prestamoRepo.findByUsuarioId(usuarioId);
+        return prestamoRepo.findByUsuarioIdCustomOrder(usuarioId);
     }
 
     public Optional<Prestamo> prestamosPorId (Integer prestamoId){
@@ -292,6 +294,30 @@ public class PrestamoService {
         MetricasDashboardDTO metricas = prestamoRepo.obtenerResumenMetricas();
 
         return metricas;
+    }
+
+    @Transactional
+    public void eliminarPrestamo(Integer id) {
+        // 1. Verificar existencia
+        Prestamo prestamo = prestamoRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("El préstamo no existe"));
+
+        // 2. Obtener las cuotas del cronograma
+        List<CronogramaPago> cronogramas = cronogramaRepo.findByPrestamoId(id);
+
+        // 3. BORRAR PAGOS ASOCIADOS (Si existe la entidad Pago)
+        // Debemos borrar los pagos antes que las cuotas por la llave foránea
+        for (CronogramaPago cuota : cronogramas) {
+            // Asumiendo que existe una relación o un repositorio para los cobros realizados
+            List<Pago> pagosDeCuota = pagoRepo.findByCronogramaId(cuota.getId());
+            pagoRepo.deleteAll(pagosDeCuota);
+        }
+
+        // 4. Borrar cronogramas
+        cronogramaRepo.deleteAll(cronogramas);
+
+        // 5. Borrar el préstamo
+        prestamoRepo.delete(prestamo);
     }
 
 }

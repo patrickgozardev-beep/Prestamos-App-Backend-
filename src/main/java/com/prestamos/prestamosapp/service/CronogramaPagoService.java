@@ -1,6 +1,7 @@
 package com.prestamos.prestamosapp.service;
 
 import com.prestamos.prestamosapp.dto.CronogramaPagoDTO;
+import com.prestamos.prestamosapp.dto.CronogramaPagoDetalladoDTO;
 import com.prestamos.prestamosapp.dto.EstadoPago;
 import com.prestamos.prestamosapp.model.CronogramaPago;
 import com.prestamos.prestamosapp.repository.CronogramaPagoRepository;
@@ -77,9 +78,9 @@ public class CronogramaPagoService {
         return dto;
     }
 
-    public List<CronogramaPago> obtenerCobrosHoyYManana() {
+    public List<CronogramaPagoDetalladoDTO> obtenerCobrosHoyYManana() {
         LocalDate inicioHoy = LocalDate.now();
         LocalDate finManana = inicioHoy.plusDays(1);
-        return cronogramaRepo.findProximosCobros(inicioHoy, finManana);
+        return cronogramaRepo.findProximosCobros(inicioHoy, inicioHoy);
     }
 }

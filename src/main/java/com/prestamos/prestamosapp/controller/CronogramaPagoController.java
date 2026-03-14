@@ -1,6 +1,7 @@
 package com.prestamos.prestamosapp.controller;
 
 import com.prestamos.prestamosapp.dto.CronogramaPagoDTO;
+import com.prestamos.prestamosapp.dto.CronogramaPagoDetalladoDTO;
 import com.prestamos.prestamosapp.model.CronogramaPago;
 import com.prestamos.prestamosapp.service.CronogramaPagoService;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,8 @@ public class CronogramaPagoController {
     }
 
     @GetMapping("/proximos-cobros")
-    public ResponseEntity<List<CronogramaPago>> obtenerProximosCobros() {
-        List<CronogramaPago> proximos = cronogramaService.obtenerCobrosHoyYManana();
+    public ResponseEntity<List<CronogramaPagoDetalladoDTO>> obtenerProximosCobros() {
+        List<CronogramaPagoDetalladoDTO> proximos = cronogramaService.obtenerCobrosHoyYManana();
         return ResponseEntity.ok(proximos);
     }
 

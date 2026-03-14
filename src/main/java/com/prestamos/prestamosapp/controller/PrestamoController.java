@@ -4,6 +4,7 @@ import com.prestamos.prestamosapp.dto.MetricasDashboardDTO;
 import com.prestamos.prestamosapp.dto.PrestamoDTO;
 import com.prestamos.prestamosapp.model.Prestamo;
 import com.prestamos.prestamosapp.service.PrestamoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,8 +63,17 @@ public class PrestamoController {
 
     @GetMapping("/dashboard/resumen")
     public ResponseEntity<MetricasDashboardDTO> getResumen() {
-
-
         return ResponseEntity.ok(prestamoService.obtenerMetricasDashboard());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            prestamoService.eliminarPrestamo(id);
+            return ResponseEntity.ok().body("Préstamo y todo su historial de pagos eliminados.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el préstamo: " + e.getMessage());
+        }
     }
 }

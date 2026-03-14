@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 public class CronogramaPagoDTO {
     private int id;
     private int numeroCuota;
-    private LocalDate fechaVencimiento;
     private BigDecimal monto;
     private BigDecimal montoPagado;
     private BigDecimal montoPendiente;
+    private LocalDate fechaVencimiento;
     private String estado;
     private LocalDateTime fechaPagado;
 }

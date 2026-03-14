@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.repository;
 
+import com.prestamos.prestamosapp.dto.CronogramaPagoDetalladoDTO;
 import com.prestamos.prestamosapp.model.CronogramaPago;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +15,21 @@ public interface CronogramaPagoRepository extends JpaRepository<CronogramaPago, 
     List<CronogramaPago> findByPrestamoId(Integer prestamoId);
     List<CronogramaPago> findByFechaPago(LocalDate fechaPago);
     List<CronogramaPago> findByPrestamoIdAndMontoPagadoLessThanOrderByFechaPagoAsc(Integer prestamoId, BigDecimal monto);
-    @Query("SELECT c FROM CronogramaPago c WHERE c.fechaPago BETWEEN :inicio AND :fin " +
-            "AND c.estado IN (com.prestamos.prestamosapp.dto.EstadoPago.PENDIENTE, com.prestamos.prestamosapp.dto.EstadoPago.PARCIAL) " +
+    @Query("SELECT new com.prestamos.prestamosapp.dto.CronogramaPagoDetalladoDTO(" +
+            "c.id, " +
+            "c.prestamo.id, " +
+            "c.prestamo.cliente.nombres as nombreCliente, " +
+            "c.numeroCuota, " +
+            "c.fechaPago, " +
+            "c.monto, " +
+            "c.montoPagado, " +
+            "(c.monto - c.montoPagado), " +
+            "CAST(c.estado as string), " +
+            "c.fechaPagado) " +
+            "FROM CronogramaPago c " +
+            "WHERE c.fechaPago BETWEEN :inicio AND :fin " +
+            "AND c.estado IN (com.prestamos.prestamosapp.dto.EstadoPago.PENDIENTE, " +
+            "com.prestamos.prestamosapp.dto.EstadoPago.PARCIAL) " +
             "ORDER BY c.fechaPago ASC")
-    List<CronogramaPago> findProximosCobros(LocalDate inicio, LocalDate fin);
+    List<CronogramaPagoDetalladoDTO> findProximosCobros(LocalDate inicio, LocalDate fin);
 }
