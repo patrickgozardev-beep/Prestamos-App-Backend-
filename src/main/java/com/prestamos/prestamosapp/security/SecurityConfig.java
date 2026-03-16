@@ -60,7 +60,7 @@ public class SecurityConfig {
 
         // Agregamos más headers comunes que a veces el navegador requiere
         configuration.setAllowedHeaders(List.of("*"));
-        
+
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L); // Cache de la respuesta OPTIONS por 1 hora
 
