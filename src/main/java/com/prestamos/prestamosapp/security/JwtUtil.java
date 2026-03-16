@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.security;
 
+import com.prestamos.prestamosapp.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -21,11 +22,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(Usuario usuario) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("nombre", usuario.getNombre());
+        claims.put("id", usuario.getId());
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(usuario.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

@@ -61,9 +61,9 @@ public class ClienteController {
         return clienteService.buscarClientes(usuarioId, busqueda);
     }
 
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Cliente> listarPorUsuario(@PathVariable Integer usuarioId){
-        return clienteService.listarPorUsuario(usuarioId);
+    @GetMapping("/usuario")
+    public List<Cliente> listarPorUsuario(){
+        return clienteService.listarPorUsuario();
     }
 
     @GetMapping
