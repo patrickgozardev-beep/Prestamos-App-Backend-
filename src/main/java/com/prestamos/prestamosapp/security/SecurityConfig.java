@@ -50,7 +50,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOriginPatterns(List.of(
                 "http://192.168.18.6:*",
-                "https://prestamosappfrontend.vercel.app"
+                "https://*.vercel.app"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

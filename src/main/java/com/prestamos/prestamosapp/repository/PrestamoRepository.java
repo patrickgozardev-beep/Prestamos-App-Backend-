@@ -33,9 +33,16 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, Integer> {
     List<Prestamo> findByUsuarioIdCustomOrder(@Param("usuarioId") Integer usuarioId);
 
     @Query("SELECT new com.prestamos.prestamosapp.dto.MetricasDashboardDTO(" +
-            "COALESCE(SUM(p.montoTotal), 0) - COALESCE((SELECT SUM(c.montoPagado) FROM CronogramaPago c WHERE c.prestamo.estado = 'ACTIVO'), 0), " +
+            // 1. Capital Vivo: Total a cobrar menos lo ya pagado de préstamos activos
+            "COALESCE(SUM(p.montoTotal), 0) - " +
+            "COALESCE((SELECT SUM(c.montoPagado) FROM CronogramaPago c WHERE c.prestamo.usuario.id = :usuarioId AND c.prestamo.estado = 'ACTIVO'), 0), " +
+
+            // 2. Ganancias Proyectadas: Intereses totales de préstamos activos
             "COALESCE(SUM(p.montoTotal - p.monto), 0), " +
-            "COALESCE((SELECT SUM(pa.monto) FROM Pago pa), 0)) " +
-            "FROM Prestamo p WHERE p.estado = 'ACTIVO'")
-    MetricasDashboardDTO obtenerResumenMetricas();
+
+            // 3. Monto Recuperado: Suma de todos los pagos realizados al usuario (vía cronograma)
+            "COALESCE((SELECT SUM(pa.monto) FROM Pago pa WHERE pa.cronograma.prestamo.usuario.id = :usuarioId), 0)) " +
+
+            "FROM Prestamo p WHERE p.usuario.id = :usuarioId AND p.estado = 'ACTIVO'")
+    MetricasDashboardDTO obtenerResumenMetricas(@Param("usuarioId") Integer usuarioId);
 }

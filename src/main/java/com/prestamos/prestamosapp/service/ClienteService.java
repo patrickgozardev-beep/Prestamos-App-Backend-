@@ -22,6 +22,10 @@ public class ClienteService {
     }
 
     public Cliente guardar(Cliente cliente){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+        cliente.setUsuario(usuario);
         return clienteRepository.save(cliente);
     }
 
