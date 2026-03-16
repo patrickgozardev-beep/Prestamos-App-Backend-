@@ -16,4 +16,11 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
 
     // Opcional: buscar pagos por monto exacto
     List<Pago> findByMonto(BigDecimal monto);
+
+    // Busca pagos navegando: Pago -> Cronograma -> Prestamo -> Id
+    List<Pago> findByCronograma_Prestamo_IdOrderByFechaPagoDesc(Integer prestamoId);
+
+    // Busca pagos por una cuota específica
+    List<Pago> findByCronogramaIdOrderByFechaPagoDesc(Integer cronogramaId);
+
 }

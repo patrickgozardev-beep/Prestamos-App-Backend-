@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.prestamos.prestamosapp.dto.EstadoPrestamo;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +8,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "prestamos")
@@ -20,14 +23,6 @@ public class Prestamo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @ManyToOne
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
-
-    @ManyToOne
-    @JoinColumn(name = "tipo_prestamo_id", nullable = false)
-    private TipoPrestamo tipoPrestamo;
 
     @Column(name="monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
@@ -58,12 +53,30 @@ public class Prestamo {
     private int cantidadCuotas;
 
     @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
+    @JsonIgnoreProperties("prestamos")
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_prestamo_id", nullable = false)
+    private TipoPrestamo tipoPrestamo;
+
+    @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "prestamo_padre_id")
+    @JsonIgnoreProperties({"cronogramas", "cliente", "usuario"}) // <--- AGREGA ESTO
     private Prestamo prestamoPadre;
+
+    @OneToMany(
+            mappedBy = "prestamo",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnoreProperties("prestamo") // <--- AGREGA ESTO
+    private List<CronogramaPago> cronogramas = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

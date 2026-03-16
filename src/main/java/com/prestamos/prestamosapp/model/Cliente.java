@@ -1,9 +1,12 @@
 package com.prestamos.prestamosapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "clientes")
@@ -41,7 +44,16 @@ public class Cliente {
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")
+    @JsonIgnoreProperties({"clientes", "password"}) // Evita que el usuario cargue sus clientes y por seguridad oculta el password
     private Usuario usuario;
+
+    @OneToMany(
+            mappedBy = "cliente",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnoreProperties("cliente")
+    private List<Prestamo> prestamos = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
