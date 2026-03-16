@@ -4,7 +4,10 @@ import com.prestamos.prestamosapp.dto.CronogramaPagoDTO;
 import com.prestamos.prestamosapp.dto.CronogramaPagoDetalladoDTO;
 import com.prestamos.prestamosapp.dto.EstadoPago;
 import com.prestamos.prestamosapp.model.CronogramaPago;
+import com.prestamos.prestamosapp.model.Usuario;
 import com.prestamos.prestamosapp.repository.CronogramaPagoRepository;
+import com.prestamos.prestamosapp.repository.UsuarioRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,9 +18,11 @@ import java.util.List;
 public class CronogramaPagoService {
 
     private final CronogramaPagoRepository cronogramaRepo;
+    private final UsuarioRepository usuarioRepo;
 
-    public CronogramaPagoService(CronogramaPagoRepository cronogramaRepo) {
+    public CronogramaPagoService(CronogramaPagoRepository cronogramaRepo,UsuarioRepository usuarioRepo) {
         this.cronogramaRepo = cronogramaRepo;
+        this.usuarioRepo = usuarioRepo;
     }
 
     public List<CronogramaPagoDTO> obtenerPorPrestamo(Integer prestamoId) {
@@ -81,6 +86,11 @@ public class CronogramaPagoService {
     public List<CronogramaPagoDetalladoDTO> obtenerCobrosHoyYManana() {
         LocalDate inicioHoy = LocalDate.now();
         LocalDate finManana = inicioHoy.plusDays(1);
-        return cronogramaRepo.findProximosCobros(inicioHoy, inicioHoy);
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
+        return cronogramaRepo.findProximosCobros(inicioHoy, inicioHoy,usuario.getId());
     }
 }

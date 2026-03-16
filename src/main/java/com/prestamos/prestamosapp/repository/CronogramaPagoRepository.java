@@ -28,8 +28,9 @@ public interface CronogramaPagoRepository extends JpaRepository<CronogramaPago, 
             "c.fechaPagado) " +
             "FROM CronogramaPago c " +
             "WHERE c.fechaPago BETWEEN :inicio AND :fin " +
+            "AND c.prestamo.usuario.id = :usuarioId " +
             "AND c.estado IN (com.prestamos.prestamosapp.dto.EstadoPago.PENDIENTE, " +
             "com.prestamos.prestamosapp.dto.EstadoPago.PARCIAL) " +
             "ORDER BY c.fechaPago ASC")
-    List<CronogramaPagoDetalladoDTO> findProximosCobros(LocalDate inicio, LocalDate fin);
+    List<CronogramaPagoDetalladoDTO> findProximosCobros(LocalDate inicio, LocalDate fin, Integer usuarioId);
 }

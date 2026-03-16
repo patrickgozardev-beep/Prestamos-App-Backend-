@@ -299,7 +299,12 @@ public class PrestamoService {
     }
 
     public MetricasDashboardDTO obtenerMetricasDashboard() {
-        MetricasDashboardDTO metricas = prestamoRepo.obtenerResumenMetricas();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
+
+        MetricasDashboardDTO metricas = prestamoRepo.obtenerResumenMetricas(usuario.getId());
 
         return metricas;
     }
