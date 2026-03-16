@@ -28,7 +28,7 @@ public class CronogramaPago {
     @Column(name = "fecha_pago", nullable = false)
     private LocalDate fechaPago;
 
-    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
+        @Column(name = "monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
 
     @Column(name = "estado", length = 20)

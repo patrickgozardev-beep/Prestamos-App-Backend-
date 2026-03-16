@@ -13,5 +13,4 @@ public class PrestamoDTO {
     private BigDecimal interesPorcentaje;
     private LocalDate fechaInicio;
     private Integer cantidadCuotas;
-    private Integer usuarioId;
 }

@@ -8,11 +8,14 @@ import com.prestamos.prestamosapp.model.*;
 import com.prestamos.prestamosapp.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,9 +49,9 @@ public class PrestamoService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         TipoPrestamo tipoPrestamo = tipoPrestamoRepo.findById(dto.getTipoPrestamoId())
                 .orElseThrow(() -> new RuntimeException("Tipo de préstamo no encontrado"));
-        Usuario usuario = usuarioRepo.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
 
         //Crear objeto Prestamo y setear campos del DTO
         Prestamo prestamo = Prestamo.builder()
@@ -112,8 +115,9 @@ public class PrestamoService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         TipoPrestamo tipoPrestamo = tipoPrestamoRepo.findById(dto.getTipoPrestamoId())
                 .orElseThrow(() -> new RuntimeException("Tipo de préstamo no encontrado"));
-        Usuario usuario = usuarioRepo.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
 
         // 2. Crear objeto Prestamo (usamos dto.getCantidadCuotas())
         Prestamo prestamo = Prestamo.builder()
@@ -123,7 +127,7 @@ public class PrestamoService {
                 .monto(dto.getMonto())
                 .interesPorcentaje(dto.getInteresPorcentaje())
                 .fechaInicio(dto.getFechaInicio())
-                .cantidadCuotas(dto.getCantidadCuotas()) // Dinámico como el diario
+                .cantidadCuotas(dto.getCantidadCuotas())
                 .estado(EstadoPrestamo.ACTIVO)
                 .build();
 
@@ -282,8 +286,12 @@ public class PrestamoService {
         return prestamoRepo.findByClienteIdCustomOrder(clienteId);
     }
 
-    public List<Prestamo> prestamosPorUsuario(Integer usuarioId){
-        return prestamoRepo.findByUsuarioIdCustomOrder(usuarioId);
+    public List<Prestamo> prestamosPorUsuario(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
+        return prestamoRepo.findByUsuarioIdCustomOrder(usuario.getId());
     }
 
     public Optional<Prestamo> prestamosPorId (Integer prestamoId){
@@ -318,6 +326,36 @@ public class PrestamoService {
 
         // 5. Borrar el préstamo
         prestamoRepo.delete(prestamo);
+    }
+
+    public String generarLinkWhatsApp(Prestamo prestamo) {
+        StringBuilder sb = new StringBuilder();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // Construcción del mensaje
+        sb.append("Hola ").append(prestamo.getCliente().getNombres()).append(",\n");
+        sb.append("Se generó el préstamo de S/ ").append(String.format("%.2f", prestamo.getMontoTotal())).append("\n");
+        sb.append("Deberá pagar en las siguientes fechas:\n\n");
+
+        for (CronogramaPago cronograma : prestamo.getCronogramas()) {
+            sb.append("Cuota #").append(cronograma.getNumeroCuota()).append(": ")
+                    .append(cronograma.getFechaPago().format(formatter))
+                    .append(" // S/ ").append(String.format("%.2f", cronograma.getMonto()))
+                    .append("\n");
+        }
+
+        String mensajeFull = sb.toString();
+
+        // Codificar el mensaje para URL
+        String mensajeCodificado = URLEncoder.encode(mensajeFull, StandardCharsets.UTF_8)
+                .replace("+", "%20"); // Wa.me prefiere %20 sobre +
+
+        // Limpiar el teléfono (debe ser solo números con código de país)
+        // Ejemplo: 51999888777 (sin el +)
+        String telefono = prestamo.getCliente().getTelefono().replaceAll("[^0-9]", "");
+        if (!telefono.startsWith("51")) telefono = "51" + telefono;
+
+        return "https://wa.me/" + telefono + "?text=" + mensajeCodificado;
     }
 
 }

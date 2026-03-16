@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class CronogramaPagoDetalladoDTO extends CronogramaPagoDTO {
 

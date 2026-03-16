@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -51,9 +53,9 @@ public class PrestamoController {
     }
 
     // Ver préstamos por usuario
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Prestamo> prestamosPorUsuario(@PathVariable Integer usuarioId){
-        return prestamoService.prestamosPorUsuario(usuarioId);
+    @GetMapping("/usuario")
+    public List<Prestamo> prestamosPorUsuario(){
+        return prestamoService.prestamosPorUsuario();
     }
 
     @GetMapping("/{prestamoId}")
@@ -75,5 +77,18 @@ public class PrestamoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al eliminar el préstamo: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}/whatsapp-link")
+    public ResponseEntity<Map<String, String>> obtenerLinkWhatsApp(@PathVariable Integer id) {
+        Prestamo prestamo = prestamoService.prestamosPorId(id)
+                .orElseThrow(() -> new RuntimeException("Préstamo no encontrado con id: " + id));
+
+        String urlWsp = prestamoService.generarLinkWhatsApp(prestamo);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("link", urlWsp);
+
+        return ResponseEntity.ok(response);
     }
 }

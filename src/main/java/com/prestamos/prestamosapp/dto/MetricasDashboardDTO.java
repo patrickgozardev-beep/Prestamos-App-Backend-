@@ -2,7 +2,6 @@ package com.prestamos.prestamosapp.dto;
 
 import java.math.BigDecimal;
 
-// MetricasDashboardDTO.java
 public record MetricasDashboardDTO(
         BigDecimal capitalVivo,       // Saldo de capital pendiente
         BigDecimal interesesPendientes, // Intereses que faltan cobrar
