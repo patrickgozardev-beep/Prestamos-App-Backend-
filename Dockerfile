@@ -21,3 +21,4 @@ ENV JAVA_TOOL_OPTIONS="-Xmx300M -Xss512k -XX:MaxMetaspaceSize=128M -Duser.timezo
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+

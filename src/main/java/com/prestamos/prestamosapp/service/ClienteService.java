@@ -1,7 +1,10 @@
 package com.prestamos.prestamosapp.service;
 
 import com.prestamos.prestamosapp.model.Cliente;
+import com.prestamos.prestamosapp.model.Usuario;
 import com.prestamos.prestamosapp.repository.ClienteRepository;
+import com.prestamos.prestamosapp.repository.UsuarioRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +14,11 @@ import java.util.Optional;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final UsuarioRepository usuarioRepo;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, UsuarioRepository usuarioRepo) {
         this.clienteRepository = clienteRepository;
+        this.usuarioRepo = usuarioRepo;
     }
 
     public Cliente guardar(Cliente cliente){
@@ -28,8 +33,11 @@ public class ClienteService {
         clienteRepository.deleteById(id);
     }
 
-    public List<Cliente> listarPorUsuario(Integer usuarioId){
-        return clienteRepository.findByUsuarioId(usuarioId);
+    public List<Cliente> listarPorUsuario(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+        return clienteRepository.findByUsuarioId(usuario.getId());
     }
 
     public List<Cliente> listarClientes(){

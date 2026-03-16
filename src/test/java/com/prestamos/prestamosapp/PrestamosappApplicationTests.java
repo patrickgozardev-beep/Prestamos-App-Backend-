@@ -13,7 +13,7 @@ class PrestamosappApplicationTests {
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        String passwordPlano = "261103";
+        String passwordPlano = "1234";
         String passwordCodificado = encoder.encode(passwordPlano);
 
         System.out.println("Password codificado: " + passwordCodificado);
