@@ -53,7 +53,7 @@ public class SecurityConfig {
                 "http://localhost:*",
                 "http://127.0.0.1:*",
                 "http://192.168.18.6:*",
-                "https://*.up.railway.app"
+                "https://prestamosappfrontend.vercel.app:*"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
