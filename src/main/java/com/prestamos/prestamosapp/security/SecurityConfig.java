@@ -48,19 +48,19 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 5. IMPORTANTE: Agrega la IP que estás usando en React (192.168.18.6)
-        // El navegador es estricto: si usas IP en el URL, el origen debe ser la IP
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://192.168.18.6:5173" // Agrega esta IP
+
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://192.168.18.6:*",
+                "https://*.up.railway.app"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         // Agregamos más headers comunes que a veces el navegador requiere
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-
+        configuration.setAllowedHeaders(List.of("*"));
+        
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L); // Cache de la respuesta OPTIONS por 1 hora
 
