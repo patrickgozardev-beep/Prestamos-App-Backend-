@@ -19,6 +19,7 @@ public class ClienteController {
 
     @PostMapping
     public Cliente crearCliente(@RequestBody Cliente cliente){
+        System.out.println("¡Llegó la petición al controlador!"); // Esto debe salir en los logs de Railway
         return clienteService.guardar(cliente);
     }
 
