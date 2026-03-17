@@ -16,7 +16,8 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "esta_es_una_llave_secreta_muy_larga_y_segura_para_gozar_capital_2026_bbva_style";    private static final long JWT_EXPIRATION = 1000 * 60 * 60 * 10;
+    private static final String SECRET_KEY = "esta_es_una_llave_secreta_muy_larga_y_segura_para_gozar_capital_2026_bbva_style";
+    private static final long JWT_EXPIRATION = 1000 * 60 * 60 * 10;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
