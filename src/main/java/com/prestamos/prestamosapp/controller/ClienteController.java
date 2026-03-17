@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.controller;
 
+import com.prestamos.prestamosapp.dto.ClienteDTO;
 import com.prestamos.prestamosapp.model.Cliente;
 import com.prestamos.prestamosapp.service.ClienteService;
 import org.springframework.web.bind.annotation.*;
@@ -18,28 +19,14 @@ public class ClienteController {
     }
 
     @PostMapping
-    public Cliente crearCliente(@RequestBody Cliente cliente){
+    public Cliente crearCliente(@RequestBody ClienteDTO cliente){
         return clienteService.guardar(cliente);
     }
 
     @PutMapping("/{id}")
-    public Cliente actualizarCliente(@PathVariable Integer id, @RequestBody Cliente cliente){
-
-        Optional<Cliente> clienteExistente = clienteService.obtenerPorId(id);
-
-        if(clienteExistente.isEmpty()){
-            throw new RuntimeException("Cliente no encontrado");
-        }
-
-        Cliente c = clienteExistente.get();
-
-        c.setNombres(cliente.getNombres());
-        c.setDni(cliente.getDni());
-        c.setTelefono(cliente.getTelefono());
-        c.setGoogleMapsLink(cliente.getGoogleMapsLink());
-        c.setDniPdf(cliente.getDniPdf());
-
-        return clienteService.guardar(c);
+    public Cliente actualizarCliente(@PathVariable Integer id, @RequestBody ClienteDTO dto) {
+        dto.setId(id);
+        return clienteService.guardar(dto);
     }
 
     @DeleteMapping("/{id}")
