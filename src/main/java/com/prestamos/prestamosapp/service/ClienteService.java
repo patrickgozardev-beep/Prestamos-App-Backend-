@@ -24,15 +24,17 @@ public class ClienteService {
     }
 
     public Cliente guardar(ClienteDTO dto) {
-        // 1. Obtener el usuario autenticado
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Validación mínima de existencia (Solo si es actualización)
-        if (dto.getId() != null) {
-            if (!clienteRepository.existsById(dto.getId())) {
-                throw new RuntimeException("No se puede actualizar: El cliente con ID " + dto.getId() + " no existe.");
+        if (dto.getId() != 0) {
+            // Solo si el ID es mayor a 0 intentamos validar existencia
+            if (dto.getId() > 0) {
+                if (!clienteRepository.existsById(dto.getId())) {
+                    throw new RuntimeException("No se puede actualizar: El cliente con ID " + dto.getId() + " no existe.");
+                }
             }
         }
 
