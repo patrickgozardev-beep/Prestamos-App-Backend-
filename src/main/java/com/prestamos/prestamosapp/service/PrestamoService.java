@@ -210,7 +210,7 @@ public class PrestamoService {
         nuevo.setInteresPorcentaje(interesIngresado);
         nuevo.setMontoTotal(nuevoMontoTotal);
         nuevo.setCantidadCuotas(nuevasCuotas);
-        nuevo.setFechaInicio(anterior.getFechaFin().plusDays(1));
+        nuevo.setFechaInicio(anterior.getFechaFin());
         nuevo.setEstado(EstadoPrestamo.ACTIVO);
 
         Prestamo guardado = prestamoRepo.save(nuevo);

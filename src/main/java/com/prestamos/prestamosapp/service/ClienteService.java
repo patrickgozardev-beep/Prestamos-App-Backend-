@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.service;
 
+import com.prestamos.prestamosapp.exception.BadRequestException;
 import com.prestamos.prestamosapp.model.Cliente;
 import com.prestamos.prestamosapp.model.Usuario;
 import com.prestamos.prestamosapp.repository.ClienteRepository;
@@ -21,10 +22,15 @@ public class ClienteService {
         this.usuarioRepo = usuarioRepo;
     }
 
-    public Cliente guardar(Cliente cliente){
+    public Cliente guardar(Cliente cliente) {
+        if (clienteRepository.existsByDni(cliente.getDni())) {
+            throw new BadRequestException("El cliente con DNI " + cliente.getDni() + " ya está registrado.");
+        }
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
         cliente.setUsuario(usuario);
         return clienteRepository.save(cliente);
     }
@@ -44,12 +50,22 @@ public class ClienteService {
         return clienteRepository.findByUsuarioId(usuario.getId());
     }
 
-    public List<Cliente> listarClientes(){
-        return clienteRepository.findAll();
+    public List<Cliente> listarClientesPorUsuario() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return clienteRepository.findByUsuarioId(usuario.getId());
     }
 
-    public List<Cliente> buscarClientes(Integer usuarioId, String busqueda){
-        return clienteRepository.buscarClientes(usuarioId, busqueda);
+    public List<Cliente> buscarClientes( String busqueda){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+
+
+        return clienteRepository.buscarClientes(usuario.getId(), busqueda);
     }
 
 }

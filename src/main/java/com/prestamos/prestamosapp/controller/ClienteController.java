@@ -19,7 +19,6 @@ public class ClienteController {
 
     @PostMapping
     public Cliente crearCliente(@RequestBody Cliente cliente){
-        System.out.println("¡Llegó la petición al controlador!"); // Esto debe salir en los logs de Railway
         return clienteService.guardar(cliente);
     }
 
@@ -55,11 +54,8 @@ public class ClienteController {
     }
 
     @GetMapping("/buscar")
-    public List<Cliente> buscarClientes(
-            @RequestParam Integer usuarioId,
-            @RequestParam String busqueda){
-
-        return clienteService.buscarClientes(usuarioId, busqueda);
+    public List<Cliente> buscarClientes(@RequestParam String busqueda){
+        return clienteService.buscarClientes( busqueda);
     }
 
     @GetMapping("/usuario")
@@ -69,7 +65,7 @@ public class ClienteController {
 
     @GetMapping
     public List<Cliente> listaClientes(){
-        return clienteService.listarClientes();
+        return clienteService.listarClientesPorUsuario();
     }
 
 
