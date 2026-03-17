@@ -25,6 +25,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
             @Param("busqueda") String busqueda
     );
 
-    boolean existsByDni(String dni);
+
     List<Cliente> findByUsuarioId(int usuarioId);
 }

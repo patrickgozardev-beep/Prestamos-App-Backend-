@@ -1,5 +1,6 @@
 package com.prestamos.prestamosapp.service;
 
+import com.prestamos.prestamosapp.dto.ClienteDTO;
 import com.prestamos.prestamosapp.exception.BadRequestException;
 import com.prestamos.prestamosapp.model.Cliente;
 import com.prestamos.prestamosapp.model.Usuario;
@@ -22,16 +23,31 @@ public class ClienteService {
         this.usuarioRepo = usuarioRepo;
     }
 
-    public Cliente guardar(Cliente cliente) {
-        if (clienteRepository.existsByDni(cliente.getDni())) {
-            throw new BadRequestException("El cliente con DNI " + cliente.getDni() + " ya está registrado.");
-        }
-
+    public Cliente guardar(ClienteDTO dto) {
+        // 1. Obtener el usuario autenticado
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en DB"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        cliente.setUsuario(usuario);
+        // 2. Validación mínima de existencia (Solo si es actualización)
+        if (dto.getId() != null) {
+            if (!clienteRepository.existsById(dto.getId())) {
+                throw new RuntimeException("No se puede actualizar: El cliente con ID " + dto.getId() + " no existe.");
+            }
+        }
+
+        // 3. Mapeo y Guardado
+        // Al no haber validación de DNI, se creará o actualizará directamente
+        Cliente cliente = Cliente.builder()
+                .id(dto.getId())
+                .dni(dto.getDni())
+                .nombres(dto.getNombres())
+                .telefono(dto.getTelefono())
+                .googleMapsLink(dto.getGoogleMapsLink())
+                .dniPdf(dto.getDniPdf())
+                .usuario(usuario)
+                .build();
+
         return clienteRepository.save(cliente);
     }
 

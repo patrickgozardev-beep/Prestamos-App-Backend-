@@ -24,7 +24,7 @@ public class Cliente {
     @Column(name = "nombres")
     private String nombres;
 
-    @Column(name="dni", unique = true, length = 8)
+    @Column(name="dni", length = 8)
     private String dni;
 
     @Column(name = "telefono")
