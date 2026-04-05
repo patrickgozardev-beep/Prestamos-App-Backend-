@@ -52,7 +52,7 @@ public class PagoService {
         BigDecimal pagadoHastaAhora = cronograma.getMontoPagado() != null ? cronograma.getMontoPagado() : BigDecimal.ZERO;
         BigDecimal faltanteCuotaActual = cronograma.getMonto().subtract(pagadoHastaAhora);
 
-        // 2. Determinamos cuánto va para esta cuota y cuánto sobra
+
         BigDecimal montoParaEstaCuota = montoRecibido.min(faltanteCuotaActual);
         BigDecimal excedente = montoRecibido.subtract(montoParaEstaCuota).max(BigDecimal.ZERO);
 

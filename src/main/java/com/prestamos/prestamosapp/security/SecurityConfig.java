@@ -35,6 +35,7 @@ public class SecurityConfig {
                         // 3. Permitir OPTIONS para evitar el error de pre-vuelo del navegador
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
