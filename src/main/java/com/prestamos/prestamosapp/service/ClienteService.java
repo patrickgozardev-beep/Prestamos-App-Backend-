@@ -24,31 +24,35 @@ public class ClienteService {
     }
 
     public Cliente guardar(ClienteDTO dto) {
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuario = usuarioRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (dto.getId() != 0) {
-            // Solo si el ID es mayor a 0 intentamos validar existencia
-            if (dto.getId() > 0) {
-                if (!clienteRepository.existsById(dto.getId())) {
-                    throw new RuntimeException("No se puede actualizar: El cliente con ID " + dto.getId() + " no existe.");
-                }
-            }
-        }
+        Cliente cliente;
 
-        // 3. Mapeo y Guardado
-        // Al no haber validación de DNI, se creará o actualizará directamente
-        Cliente cliente = Cliente.builder()
-                .id(dto.getId())
-                .dni(dto.getDni())
-                .nombres(dto.getNombres())
-                .telefono(dto.getTelefono())
-                .googleMapsLink(dto.getGoogleMapsLink())
-                .dniPdf(dto.getDniPdf())
-                .usuario(usuario)
-                .build();
+        // Si el ID existe y es mayor a 0, es una ACTUALIZACIÓN
+        if (dto.getId() != 0 && dto.getId() > 0) {
+            cliente = clienteRepository.findById(dto.getId())
+                    .orElseThrow(() -> new RuntimeException("El cliente no existe"));
+
+            // ACTUALIZAMOS solo los campos necesarios
+            cliente.setDni(dto.getDni());
+            cliente.setNombres(dto.getNombres());
+            cliente.setTelefono(dto.getTelefono());
+            cliente.setGoogleMapsLink(dto.getGoogleMapsLink());
+            cliente.setDniPdf(dto.getDniPdf());
+            // NO tocamos la lista de préstamos, así se mantiene lo que ya existía
+        } else {
+            // Si no hay ID, es un REGISTRO NUEVO
+            cliente = Cliente.builder()
+                    .dni(dto.getDni())
+                    .nombres(dto.getNombres())
+                    .telefono(dto.getTelefono())
+                    .googleMapsLink(dto.getGoogleMapsLink())
+                    .dniPdf(dto.getDniPdf())
+                    .usuario(usuario)
+                    .build();
+        }
 
         return clienteRepository.save(cliente);
     }
