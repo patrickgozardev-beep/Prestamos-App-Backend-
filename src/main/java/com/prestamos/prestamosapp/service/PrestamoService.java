@@ -339,7 +339,7 @@ public class PrestamoService {
 
         // Construcción del mensaje
         sb.append("Hola ").append(prestamo.getCliente().getNombres()).append(",\n");
-        sb.append("Se generó el préstamo de S/ ").append(String.format("%.2f", prestamo.getMontoTotal())).append("\n");
+        sb.append("Se generó el préstamo de S/ ").append(String.format("%.2f", prestamo.getMonto())).append("\n");
         sb.append("Deberá pagar en las siguientes fechas:\n\n");
 
         for (CronogramaPago cronograma : prestamo.getCronogramas()) {
